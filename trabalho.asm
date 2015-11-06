@@ -18,7 +18,8 @@ segment code
    	mov		al,12h
 	mov		ah,0
    	int		10h
-	
+
+
 ;desenhar interface Gráfica
 	; linha do limite inferior
 	mov		byte[cor],branco_intenso	
@@ -152,22 +153,69 @@ segment code
 	; Desenhar botão down
 	call desenharBotoesDown
 	
-	;escrever mensagens na tela
+	; escrever mensagens na tela
 	call escreverMensagens
-	
 
+	; detectar cliques do mouse
+	call mouse
 	
-
+	;call saida
 	
-	
-; Sai do programa após qualquer tecla	
-	mov    	ah,08h
-	int     21h
+; Sai do programa após qualquer tecla
+saida:
+	;mov    	ah,08h
+	;int     21h
 	mov  	ah,0   			; set video mode
 	mov  	al,[modo_anterior]   	; modo anterior
 	int  	10h
 	mov     ax,4c00h
 	int     21h
+	
+;_____________________________________________________________________
+;   função mouse
+; 	Detecta quando houver interrupção do mouse
+; url referência =  https://courses.engr.illinois.edu/ece390/books/labmanual/io-devices-mouse.html
+mouse:
+	; show mouse cursor
+	mov ax, 1h
+	int 33h
+	
+	; return position and buttons status
+	; input: mov ax, 3h
+	; output: 	bx -> button status (0->left, 1->right, 2->middle, 3-15->cleared)
+	; 			cx -> pixel column position
+	;			dx -> pixel row position
+	mov ax, 3h
+	int 33h
+	mov word[mouseClick], bx
+	mov word[mousePosX], cx
+	mov word[mousePosY], dx
+	; Verifica se o mouse foi clicado
+	call checkMouseClick
+	
+	
+	; Encerra o programa se a tecla ESC for pressionada
+	mov 	ah, 08
+	int 	21h
+	cmp 	al, 27
+	jz		saida 	
+
+	
+	loop mouse
+	
+;_____________________________________________________________________
+;   função checkMouseClick
+;	Check if the mouse was clicked
+checkMouseClick:
+	cmp		word[mouseClick], 1h
+	je		checkMouseX		; Se botão direito for clicado checa posicao
+	jne		mouse
+
+;_____________________________________________________________________
+;   função checkMouseX
+;	Check the position of mouseX
+checkMouseX:
+	ret	
 	
 ;_____________________________________________________________________
 ;   função escreverMensagens
@@ -958,11 +1006,20 @@ deltax		dw		0
 deltay		dw		0	
 mens    	db  		'Funcao Grafica'
 
+; Mensagens do programa
 msgAbrir db 'Abrir'
 msgQv db 'Qv'
 msgP db 'P'
 msgQw db 'Qw'
 msgSair db 'Abrir'
+
+; Cliques do mouse
+mouseClick dw 0h
+mousePosX dw 0h
+mousePosY dw 0h
+
+; KeyPressed
+kbdbuf	db 128
 
 xInicio	dw 	1
 xFinal	dw	479
@@ -972,3 +1029,10 @@ yFinal	dw	639
 segment stack stack
     		resb 		512
 stacktop:
+
+; Referências de páginas
+; https://courses.engr.illinois.edu/ece390/books/labmanual/io-devices-mouse.html
+; http://pastebin.com/WWe7Sk9d#
+; http://www.tutorialspoint.com/assembly_programming/assembly_registers.htm
+; http://www.cs.virginia.edu/~evans/cs216/guides/x86.html
+; http://regismain.wikidot.com/assembler
