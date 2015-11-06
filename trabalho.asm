@@ -165,37 +165,260 @@ segment code
 ;_____________________________________________________________________
 ;   função desenharBotoesUp
 desenharBotoesUp:
+	call desenharBotaoUpQv
+	call desenharBotaoUpP
+	call desenharBotaoUpQw
 	ret
 
 ;_____________________________________________________________________
 ;   função desenharBotaoUpQv
 desenharBotaoUpQv:
+	; Desenhar reta base
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 130	+ 80 + 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 20)		; x2
+	push 	ax
+	mov 	ax, 130	+ 80 + 80	; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 130	+ 80 + 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 150 + 80 + 80	; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, ((512 + 15) + 20)		; x1
+	push	ax
+	mov 	ax, 130	+ 80 + 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 150 + 80 + 80		; y2
+	push 	ax
+	call 	line
+	
+	ret
 	ret
 ;_____________________________________________________________________
 ;   função desenharBotaoUpP
 desenharBotaoUpP:
+	; Desenhar reta base
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 130	+ 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 20)		; x2
+	push 	ax
+	mov 	ax, 130	+ 80	; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 130	+ 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 150 + 80	; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, ((512 + 15) + 20)		; x1
+	push	ax
+	mov 	ax, 130	+ 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 150 + 80		; y2
+	push 	ax
+	call 	line
+	
 	ret
 ;_____________________________________________________________________
 ;   função desenharBotaoUpQw
 desenharBotaoUpQw:
+	; Desenhar reta base
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 130		; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 20)		; x2
+	push 	ax
+	mov 	ax, 130		; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 130		; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 150		; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, ((512 + 15) + 20)		; x1
+	push	ax
+	mov 	ax, 130		; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 150		; y2
+	push 	ax
+	call 	line
+	
 	ret
 	
 ;_____________________________________________________________________
 ;   função desenharBotoesDown
 desenharBotoesDown:
+	call desenharBotaoDownQv
+	call desenharBotaoDownP
+	call desenharBotaoDownQw
 	ret
 
 ;_____________________________________________________________________
-;   função desenharBotaoUpQv
-desenharBotaoUpQv:
+;   função desenharBotaoDownQv
+desenharBotaoDownQv:
+	; Desenhar reta base
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 110	+ 80 + 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 20)		; x2
+	push 	ax
+	mov 	ax, 110	+ 80 + 80	; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 110	+ 80 + 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 90 + 80 + 80	; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, ((512 + 15) + 20)		; x1
+	push	ax
+	mov 	ax, 110	+ 80 + 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 90 + 80 + 80		; y2
+	push 	ax
+	call 	line
+	
 	ret
 ;_____________________________________________________________________
-;   função desenharBotaoUpP
-desenharBotaoUpP:
+;   função desenharBotaoDownP
+desenharBotaoDownP:
+	; Desenhar reta base
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 110	+ 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 20)		; x2
+	push 	ax
+	mov 	ax, 110	+ 80	; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 110	+ 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 90 + 80	; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, ((512 + 15) + 20)		; x1
+	push	ax
+	mov 	ax, 110	+ 80	; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 90 + 80		; y2
+	push 	ax
+	call 	line
+	
 	ret
 ;_____________________________________________________________________
-;   função desenharBotaoUpQw
-desenharBotaoUpQw:
+;   função desenharBotaoDownQw
+desenharBotaoDownQw:
+	; Desenhar reta base
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 110		; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 20)		; x2
+	push 	ax
+	mov 	ax, 110		; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, (512 + 15)		; x1
+	push	ax
+	mov 	ax, 110		; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 90		; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar diagonal esquerda
+	mov		byte[cor],branco_intenso	
+	mov		ax, ((512 + 15) + 20)		; x1
+	push	ax
+	mov 	ax, 110		; y1
+	push 	ax
+	mov		ax, ((512 + 15) + 10)		; x2
+	push 	ax
+	mov 	ax, 90		; y2
+	push 	ax
+	call 	line
+	
 	ret
 	
 ;_____________________________________________________________________
