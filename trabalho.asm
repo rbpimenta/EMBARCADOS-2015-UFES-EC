@@ -152,6 +152,13 @@ segment code
 	; Desenhar botão down
 	call desenharBotoesDown
 	
+	;escrever mensagens na tela
+	call escreverMensagens
+	
+
+	
+
+	
 	
 ; Sai do programa após qualquer tecla	
 	mov    	ah,08h
@@ -161,7 +168,145 @@ segment code
 	int  	10h
 	mov     ax,4c00h
 	int     21h
+	
+;_____________________________________________________________________
+;   função escreverMensagens
+escreverMensagens:
+	call escreverMsgAbrir
+	call escreverMsgP
+	call escreverMsgQw
+	call escreverMsgQv
+	ret
 
+;_____________________________________________________________________
+;   função escreverMsgQv
+escreverMsgQv:
+    mov     cx,2			;número de caracteres
+    mov     bx,0
+    mov     dh,12			;linha 0-29
+    mov     dl,74			;coluna 0-79
+	mov		byte[cor],branco_intenso
+
+loopMsgQv:
+	call	cursor
+    mov     al,[bx+msgQv]
+	call	caracter
+    inc     bx				;proximo caracter
+	inc		dl				;avanca a coluna
+	;inc		byte [cor]		;mudar a cor para a seguinte
+    loop    loopMsgQv
+	ret
+
+;_____________________________________________________________________
+;   função escreverMsgP
+escreverMsgP:
+    mov     cx,1			;número de caracteres
+    mov     bx,0
+    mov     dh,17			;linha 0-29
+    mov     dl,74			;coluna 0-79
+	mov		byte[cor],branco_intenso
+
+loopMsgP:
+	call	cursor
+    mov     al,[bx+msgP]
+	call	caracter
+    inc     bx				;proximo caracter
+	inc		dl				;avanca a coluna
+	;inc		byte [cor]		;mudar a cor para a seguinte
+    loop    loopMsgP
+	ret
+	
+;_____________________________________________________________________
+;   função escreverMsgQw
+escreverMsgQw:
+    mov     cx,2			;número de caracteres
+    mov     bx,0
+    mov     dh,22			;linha 0-29
+    mov     dl,74 			;coluna 0-79
+	mov		byte[cor],branco_intenso
+
+loopMsgQw:
+	call	cursor
+    mov     al,[bx+msgQw]
+	call	caracter
+    inc     bx				;proximo caracter
+	inc		dl				;avanca a coluna
+	;inc		byte [cor]		;mudar a cor para a seguinte
+    loop    loopMsgQw
+	ret
+	
+;_____________________________________________________________________
+;   função escreverMsgAbrir
+escreverMsgAbrir:
+    mov     cx,5			;número de caracteres
+    mov     bx,0
+    mov     dh,2			;linha 0-29
+    mov     dl,70			;coluna 0-79
+	mov		byte[cor],branco_intenso
+
+loopMsgAbrir:
+	call	cursor
+    mov     al,[bx+msgAbrir]
+	call	caracter
+    inc     bx				;proximo caracter
+	inc		dl				;avanca a coluna
+	;inc		byte [cor]		;mudar a cor para a seguinte
+    loop    loopMsgAbrir
+	ret
+	
+;_____________________________________________________________________
+;   função cursor
+; 	dh = linha (0-29) e  dl=coluna  (0-79)
+cursor:
+	pushf
+	push 	ax
+	push 	bx
+	push	cx
+	push	dx
+	push	si
+	push	di
+	push	bp
+	mov     ah,2
+	mov     bh,0
+	int     10h
+	pop		bp
+	pop		di
+	pop		si
+	pop		dx
+	pop		cx
+	pop		bx
+	pop		ax
+	popf
+	ret
+;_____________________________________________________________________
+;   função caracter 
+;	escrito na posição do cursor
+; 	al= caracter a ser escrito
+; 	cor definida na variavel cor
+caracter:
+	pushf
+	push 	ax
+	push 	bx
+	push	cx
+	push	dx
+	push	si
+	push	di
+	push	bp
+    mov     ah,9
+    mov     bh,0
+    mov     cx,1
+   	mov     bl,[cor]
+    int     10h
+	pop		bp
+	pop		di
+	pop		si
+	pop		dx
+	pop		cx
+	pop		bx
+	pop		ax
+	popf
+	ret
+	
 ;_____________________________________________________________________
 ;   função desenharBotoesUp
 desenharBotoesUp:
@@ -812,6 +957,12 @@ coluna  	dw  		0
 deltax		dw		0
 deltay		dw		0	
 mens    	db  		'Funcao Grafica'
+
+msgAbrir db 'Abrir'
+msgQv db 'Qv'
+msgP db 'P'
+msgQw db 'Qw'
+msgSair db 'Abrir'
 
 xInicio	dw 	1
 xFinal	dw	479
