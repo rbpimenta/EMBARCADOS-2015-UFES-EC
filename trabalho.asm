@@ -22,7 +22,7 @@ segment code
 
 ;desenhar interface Gráfica
 	; linha do limite inferior
-	mov		byte[cor],branco_intenso	
+	mov		byte[cor],branco_intenso
 	mov		ax, 0	; x1
 	push	ax
 	mov 	ax, 0	; y1
@@ -145,7 +145,7 @@ segment code
 	call desenharLinhasIntermediarias
 	
 	; Desenhar seta
-	call desenharSetaMenu
+	; call desenharSetaMenu
 	
 	; Desenhar botão up
 	call desenharBotoesUp
@@ -174,7 +174,6 @@ saida:
 ;_____________________________________________________________________
 ;   função mouse
 ; 	Detecta quando houver interrupção do mouse
-; url referência =  https://courses.engr.illinois.edu/ece390/books/labmanual/io-devices-mouse.html
 mouse:
 	; show mouse cursor
 	mov ax, 1h
@@ -190,16 +189,8 @@ mouse:
 	mov word[mouseClick], bx
 	mov word[mousePosX], cx
 	mov word[mousePosY], dx
-	; Verifica se o mouse foi clicado
+	; Verifica se o mouse foi clicado	
 	call checkMouseClick
-	
-	
-	; Encerra o programa se a tecla ESC for pressionada
-	mov 	ah, 08
-	int 	21h
-	cmp 	al, 27
-	jz		saida 	
-
 	
 	loop mouse
 	
@@ -215,16 +206,123 @@ checkMouseClick:
 ;   função checkMouseX
 ;	Check the position of mouseX
 checkMouseX:
-	ret	
+	mov		ax, 512
+	cmp		word[mousePosX], ax
+	jge		checkMouseY		; if greater or equal 512
+	call	mouse	
+
+;_____________________________________________________________________
+;   função checkMouseY
+;	Check the position of mouseY
+checkMouseY:
+	mov		ax, 400
+	cmp		word[mousePosY], ax
+	jge		selecionarSair
+
+	mov		ax, 320
+	cmp		word[mousePosY], ax
+	jge		selecionarQw
 	
+	mov		ax, 240
+	cmp		word[mousePosY], ax
+	jge		selecionarP
+
+	mov		ax, 160
+	cmp		word[mousePosY], ax
+	jge		selecionarQv
+	
+	mov		ax, 80
+	cmp		word[mousePosY], ax
+	jge		selecionarSeta
+	
+	mov		ax, 0
+	cmp		word[mousePosY], ax
+	jge		selecionarAbrir
+	
+	call 	mouse
+
+;_____________________________________________________________________
+;   função selecionarSair	
+selecionarSeta:
+	call 	escreverMensagens
+	call	desenharSetaMenuSelecionado
+	call	mouse
+	
+;_____________________________________________________________________
+;   função selecionarSair
+selecionarSair:
+	call 	escreverMensagens
+	call	escreverMsgSairSelecionado
+	call	saida	
+
+;_____________________________________________________________________
+;   função selecionarQw
+selecionarQw:
+	call 	escreverMensagens
+	call	escreverMsgQwSelecionado
+	call	mouse
+	
+;_____________________________________________________________________
+;   função selecionarP
+selecionarP:
+	call 	escreverMensagens
+	call	escreverMsgPSelecionado
+	call	mouse
+	
+;_____________________________________________________________________
+;   função selecionarAbrir
+selecionarAbrir:
+	call 	escreverMensagens
+	call	escreverMsgAbrirSelecionado
+	call	mouse
+	
+;_____________________________________________________________________
+;   função selecionarQv
+selecionarQv:
+	call 	escreverMensagens
+	call	escreverMsgQvSelecionado
+	call	mouse
+
 ;_____________________________________________________________________
 ;   função escreverMensagens
 escreverMensagens:
-	call escreverMsgAbrir
-	call escreverMsgP
-	call escreverMsgQw
-	call escreverMsgQv
+	call	escreverMsgAbrir
+	call 	escreverMsgP
+	call 	escreverMsgQw
+	call 	escreverMsgQv
+	call	escreverMsgSair
+	call	desenharSetaMenu
 	ret
+
+;_____________________________________________________________________
+;   função escreverMsgSair
+escreverMsgSair:
+    mov     cx,4			;número de caracteres
+    mov     bx,0
+    mov     dh,27			;linha 0-29
+    mov     dl,70			;coluna 0-79
+	mov		byte[cor], branco_intenso
+
+loopMsgSair:
+	call	cursor
+    mov     al,[bx+msgSair]
+	call	caracter
+    inc     bx				;proximo caracter
+	inc		dl				;avanca a coluna
+	;inc		byte [cor]		;mudar a cor para a seguinte
+    loop    loopMsgSair
+	ret
+
+;_____________________________________________________________________
+;   função escreverMsgSairSelecionado
+escreverMsgSairSelecionado:
+    mov     cx,4			;número de caracteres
+    mov     bx,0
+    mov     dh,27			;linha 0-29
+    mov     dl,70			;coluna 0-79
+	mov		byte[cor], verde
+	call	loopMsgSair
+	ret	
 
 ;_____________________________________________________________________
 ;   função escreverMsgQv
@@ -233,7 +331,7 @@ escreverMsgQv:
     mov     bx,0
     mov     dh,12			;linha 0-29
     mov     dl,74			;coluna 0-79
-	mov		byte[cor],branco_intenso
+	mov		byte[cor], branco_intenso
 
 loopMsgQv:
 	call	cursor
@@ -245,6 +343,17 @@ loopMsgQv:
     loop    loopMsgQv
 	ret
 
+;_____________________________________________________________________
+;   função escreverMsgQvSelecionado
+escreverMsgQvSelecionado:
+    mov     cx,2			;número de caracteres
+    mov     bx,0
+    mov     dh,12			;linha 0-29
+    mov     dl,74			;coluna 0-79
+	mov		byte[cor], verde
+	call	loopMsgQv
+	ret
+	
 ;_____________________________________________________________________
 ;   função escreverMsgP
 escreverMsgP:
@@ -263,7 +372,17 @@ loopMsgP:
 	;inc		byte [cor]		;mudar a cor para a seguinte
     loop    loopMsgP
 	ret
-	
+
+;_____________________________________________________________________
+;   função escreverMsgPSelecionado
+escreverMsgPSelecionado:
+    mov     cx,1			;número de caracteres
+    mov     bx,0
+    mov     dh,17			;linha 0-29
+    mov     dl,74			;coluna 0-79
+	mov		byte[cor],verde
+	call 	loopMsgP
+	ret	
 ;_____________________________________________________________________
 ;   função escreverMsgQw
 escreverMsgQw:
@@ -282,7 +401,17 @@ loopMsgQw:
 	;inc		byte [cor]		;mudar a cor para a seguinte
     loop    loopMsgQw
 	ret
-	
+
+;_____________________________________________________________________
+;   função escreverMsgQwSelecionado
+escreverMsgQwSelecionado:
+    mov     cx,2			;número de caracteres
+    mov     bx,0
+    mov     dh,22			;linha 0-29
+    mov     dl,74 			;coluna 0-79
+	mov		byte[cor],verde
+	call 	loopMsgQw
+	ret	
 ;_____________________________________________________________________
 ;   função escreverMsgAbrir
 escreverMsgAbrir:
@@ -302,6 +431,16 @@ loopMsgAbrir:
     loop    loopMsgAbrir
 	ret
 	
+;_____________________________________________________________________
+;   função escreverMsgAbrirSelecionado
+escreverMsgAbrirSelecionado:
+    mov     cx,5			;número de caracteres
+    mov     bx,0
+    mov     dh,2			;linha 0-29
+    mov     dl,70			;coluna 0-79
+	mov		byte[cor],verde
+	call 	loopMsgAbrir
+	ret	
 ;_____________________________________________________________________
 ;   função cursor
 ; 	dh = linha (0-29) e  dl=coluna  (0-79)
@@ -702,6 +841,95 @@ desenharSetaMenu:
 	call 	line
 	
 	ret
+
+;_____________________________________________________________________
+;   função desenharSetaMenuSelecionado
+desenharSetaMenuSelecionado:
+	; Desenhar parte da direita da seta
+	mov		byte[cor],verde	
+	mov		ax, (512 + 20)		; x1
+	push	ax
+	mov 	ax, (320 + 30)		; y1
+	push 	ax
+	mov		ax, (512 + 20)		; x2
+	push 	ax
+	mov 	ax, (320 + 30 + 20)		; y2
+	push 	ax
+	call 	line
+		
+	; Desenhar reta inferior do corpo da seta
+	mov		byte[cor],verde	
+	mov		ax, (512 + 20)		; x1
+	push	ax
+	mov 	ax, (320 + 30)		; y1
+	push 	ax
+	mov		ax, (512 + 20) + 50		; x2
+	push 	ax
+	mov 	ax, (320 + 30)		; y2
+	push 	ax
+	call 	line		
+
+	; Desenhar reta superior do corpo da seta
+	mov		byte[cor],verde	
+	mov		ax, (512 + 20)		; x1
+	push	ax
+	mov 	ax, (320 + 30 + 20)		; y1
+	push 	ax
+	mov		ax, (512 + 20) + 50		; x2
+	push 	ax
+	mov 	ax, (320 + 30 + 20)		; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar reta vertical superior
+	mov		byte[cor],verde	
+	mov		ax, ((512 + 20) + 50)		; x1
+	push	ax
+	mov 	ax, (320 + 30 + 20)			; y1
+	push 	ax
+	mov		ax, ((512 + 20) + 50)		; x2
+	push 	ax
+	mov 	ax, (320 + 30 + 20) + 10	; y2
+	push 	ax
+	call 	line
+
+	; Desenhar reta diagonal superior
+	mov		byte[cor],verde	
+	mov		ax, ((512 + 20) + 50)		; x1
+	push	ax
+	mov 	ax, (320 + 30 + 20)	+ 10	; y1
+	push 	ax
+	mov		ax, ((512 + 20) + 50) + 30	; x2
+	push 	ax
+	mov 	ax, (320 + 30) + 10			; y2
+	push 	ax
+	call 	line
+	
+	; Desenhar reta vertical inferior
+	mov		byte[cor],verde	
+	mov		ax, ((512 + 20) + 50)	; x1
+	push	ax
+	mov 	ax, (320 + 30)			; y1
+	push 	ax
+	mov		ax, ((512 + 20) + 50)	; x2
+	push 	ax
+	mov 	ax, (320 + 30) - 10 	; y2
+	push 	ax
+	call 	line
+
+	; Desenhar reta diagonal inferior
+	mov		byte[cor],verde	
+	mov		ax, ((512 + 20) + 50)		; x1
+	push	ax
+	mov 	ax, (320 + 30) - 10			; y1
+	push 	ax
+	mov		ax, ((512 + 20) + 50) + 30	; x2
+	push 	ax
+	mov 	ax, (320 + 30) + 10			; y2
+	push 	ax
+	call 	line
+	
+	ret
 	
 ;_____________________________________________________________________
 ;   função desenharLinhasIntermediarias
@@ -999,6 +1227,8 @@ magenta_claro	equ		13
 amarelo		equ		14
 branco_intenso	equ		15
 
+corSelecionado	db	verde
+
 modo_anterior	db		0
 linha   	dw  		0
 coluna  	dw  		0
@@ -1011,7 +1241,7 @@ msgAbrir db 'Abrir'
 msgQv db 'Qv'
 msgP db 'P'
 msgQw db 'Qw'
-msgSair db 'Abrir'
+msgSair db 'Sair'
 
 ; Cliques do mouse
 mouseClick dw 0h
@@ -1036,3 +1266,4 @@ stacktop:
 ; http://www.tutorialspoint.com/assembly_programming/assembly_registers.htm
 ; http://www.cs.virginia.edu/~evans/cs216/guides/x86.html
 ; http://regismain.wikidot.com/assembler
+; http://www.cin.ufpe.br/~arfs/Assembly/apostilas/Tutorial%20Assembly%20-%20Gavin/ASM5.HTM
