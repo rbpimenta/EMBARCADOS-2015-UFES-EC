@@ -181,10 +181,19 @@ mouse:
 	
 	; return position and buttons status
 	; input: mov ax, 3h
+	;
 	; output: 	bx -> button status (0->left, 1->right, 2->middle, 3-15->cleared)
 	; 			cx -> pixel column position
 	;			dx -> pixel row position
-	mov ax, 3h
+	;_____________________________________________________________________
+	; input: 	mov ax, 5h
+	;		 	mov bx, (0 -> left, 1 -> right)
+	;
+	; output: 	bx ->count of button press
+	; 			cx -> horizontal position of last press
+	;			dx -> vertical position of last press
+	mov ax, 5h
+	mov bx, 0
 	int 33h
 	mov word[mouseClick], bx
 	mov word[mousePosX], cx
@@ -274,6 +283,9 @@ selecionarP:
 selecionarAbrir:
 	call 	escreverMensagens
 	call	escreverMsgAbrirSelecionado
+	
+	; Realizar algoritmo para abrir arquivo
+	
 	call	mouse
 	
 ;_____________________________________________________________________
@@ -1190,7 +1202,7 @@ plot_xy:
 ;*******************************************************************
 segment data
 
-cor		db		branco_intenso
+cor				db		branco_intenso
 
 ;	I R G B COR
 ;	0 0 0 0 preto
@@ -1210,51 +1222,63 @@ cor		db		branco_intenso
 ;	1 1 1 0 amarelo
 ;	1 1 1 1 branco intenso
 
-preto		equ		0
-azul		equ		1
-verde		equ		2
-cyan		equ		3
-vermelho	equ		4
-magenta		equ		5
-marrom		equ		6
-branco		equ		7
-cinza		equ		8
-azul_claro	equ		9
-verde_claro	equ		10
-cyan_claro	equ		11
-rosa		equ		12
+preto			equ		0
+azul			equ		1
+verde			equ		2
+cyan			equ		3
+vermelho		equ		4
+magenta			equ		5
+marrom			equ		6
+branco			equ		7
+cinza			equ		8
+azul_claro		equ		9
+verde_claro		equ		10
+cyan_claro		equ		11
+rosa			equ		12
 magenta_claro	equ		13
-amarelo		equ		14
+amarelo			equ		14
 branco_intenso	equ		15
 
 corSelecionado	db	verde
 
 modo_anterior	db		0
-linha   	dw  		0
-coluna  	dw  		0
-deltax		dw		0
-deltay		dw		0	
-mens    	db  		'Funcao Grafica'
+linha   		dw 		0
+coluna  		dw  	0
+deltax			dw		0
+deltay			dw		0	
+mens    		db  	'Funcao Grafica'
 
 ; Mensagens do programa
-msgAbrir db 'Abrir'
-msgQv db 'Qv'
-msgP db 'P'
-msgQw db 'Qw'
-msgSair db 'Sair'
+msgAbrir 		db 'Abrir'
+msgQv	 		db 'Qv'
+msgP 			db 'P'
+msgQw 			db 'Qw'
+msgSair 		db 'Sair'
 
 ; Cliques do mouse
-mouseClick dw 0h
-mousePosX dw 0h
-mousePosY dw 0h
+mouseClick 		dw 0h
+mousePosX 		dw 0h
+mousePosY 		dw 0h
+
+; Variáveis do sistema
+valueQv			dw 1
+valueP			dw 40
+valueQw			dw 1
+limiteSuperior 	dw 500
+limiteInferior 	dw 500
+valueIncremento dw 10
+valueDecremento dw 10
+
+; Arquivos
+filename db "D:\Rodrigo\UFES\Embarcados\Programas\Codigo\sinal.txt", 0
 
 ; KeyPressed
-kbdbuf	db 128
+kbdbuf			db 128
 
-xInicio	dw 	1
-xFinal	dw	479
-yInicio	dw	1
-yFinal	dw	639
+xInicio			dw 	1
+xFinal			dw	479
+yInicio			dw	1
+yFinal			dw	639
 ;*************************************************************************
 segment stack stack
     		resb 		512
@@ -1267,3 +1291,6 @@ stacktop:
 ; http://www.cs.virginia.edu/~evans/cs216/guides/x86.html
 ; http://regismain.wikidot.com/assembler
 ; http://www.cin.ufpe.br/~arfs/Assembly/apostilas/Tutorial%20Assembly%20-%20Gavin/ASM5.HTM
+;
+; Leitura de arquivo
+; http://www.cin.ufpe.br/~arfs/Assembly/apostilas/Tutorial%20Assembly%20-%20Gavin/ASM6.HTM
