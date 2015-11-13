@@ -19,7 +19,6 @@ segment code
 	mov		ah,0
    	int		10h
 
-
 ;desenhar interface Gráfica
 	; linha do limite inferior
 	mov		byte[cor],branco_intenso
@@ -165,6 +164,7 @@ segment code
 saida:
 	;mov    	ah,08h
 	;int     21h
+	call 	fecharArquivoLeitura
 	mov  	ah,0   			; set video mode
 	mov  	al,[modo_anterior]   	; modo anterior
 	int  	10h
@@ -238,7 +238,7 @@ checkMouseY:
 
 	mov		ax, 160
 	cmp		word[mousePosY], ax
-	jge		selecionarQv
+	jge		auxSelecionarQv
 	
 	mov		ax, 80
 	cmp		word[mousePosY], ax
@@ -250,6 +250,11 @@ checkMouseY:
 	
 	call 	mouse
 
+;_____________________________________________________________________
+;   função auxSelecionarQv	
+auxSelecionarQv:
+	call selecionarQv
+	ret
 ;_____________________________________________________________________
 ;   função selecionarSair	
 selecionarSeta:
@@ -277,16 +282,184 @@ selecionarP:
 	call 	escreverMensagens
 	call	escreverMsgPSelecionado
 	call	mouse
-	
+
+;################## MANIPULAÇÃO DE ARQUIVO ###########################
 ;_____________________________________________________________________
 ;   função selecionarAbrir
 selecionarAbrir:
 	call 	escreverMensagens
 	call	escreverMsgAbrirSelecionado
+	call 	abrirArquivo
+	call 	mouse
 	
+abrirArquivo:
 	; Realizar algoritmo para abrir arquivo
+	mov 	dx, filename
 	
-	call	mouse
+	; mov al, xx
+	; 00 -> somenta leitura
+	; 01 -> somente escrita
+	; 02 -> escrita/leitura
+	mov 	al, 0
+	mov		ah, 3dh		; comando de abrir arquivo
+	int 	21h
+	
+	; armazena o handler do arquivo para ser utilizado  futuramente
+	mov 	[fileHandler], ax
+	jc		ErrorOpening
+
+;_____________________________________________________________________
+;   função lerArquivo
+lerArquivo:
+	call 	limparDadosTela
+	mov		word[contadorDadosVisualizados], 0
+	mov		word[contadorGeral], 0
+	
+	mov 	dx, dadosArquivo	; Endereço do buffer em dx
+	mov		bx, [fileHandler]	; manipulados em bx
+	mov		cx, 1				; tratando o arquivo byte a byte
+
+;_____________________________________________________________________
+;   função loopLeitura
+;	Lê todo o arquivo e armazena na variável dadosArquivo (definida na função lerArquivo)	
+loopLeitura:
+	mov 	ah, 3fh
+	inc		word[contadorGeral]
+	int 	21h
+	jc		ErrorReading
+	
+	inc 	dx
+	cmp		word[contadorGeral], 9216	; Leitura de 512 linhas
+	jne		loopLeitura
+	dec		word[contadorGeral]			; decrementa pois chegamos no final do arquivo
+	
+	ret
+;_____________________________________________________________________
+;   função limparDadosTela
+limparDadosTela:
+	mov		byte[cor], preto
+	xor		bx, bx
+	mov		cx, 511		; Limites para não pegar as linhas da tela
+	mov		bx, 1		; da interface
+	
+;_____________________________________________________________________
+;   função loopLimparDadosTela
+loopLimparDadosTela:
+
+	; Escreve várias linhas verticalmente até limpar todos os 
+	; pontos da tela	
+	mov		ax, bx	; x1
+	push	ax
+	mov 	ax, 1	; y1
+	push 	ax
+	mov		ax, bx	; x2
+	push 	ax
+	mov 	ax, 478	; y2
+	push 	ax
+	call 	line
+	
+	inc 	bx
+	loop	loopLimparDadosTela
+	ret
+	
+;_____________________________________________________________________
+;   função ErrorOpening
+;	Chamada se ocorrer um erro abrindo um arquivo
+ErrorOpening:
+	call	checkError
+	mov  	ah,0   			; set video mode
+	mov  	al,[modo_anterior]   	; modo anterior
+	int  	10h
+	
+	mov 	dx, OpenError 	; exibe um erro
+	mov 	ah, 09h 		; usando a função 09h
+	int	 	21h 			; chama serviço do DOS
+	
+	mov 	dx, CodErro 	; exibe o codigo do erro
+	mov 	ah, 09h 		; usando a função 09h
+	int	 	21h 			; chama serviço do DOS
+	
+	mov 	ax, 4C01h 		; termina programa com um errorlevel =1 
+	int 	21h
+	ret
+	
+;_____________________________________________________________________
+;   função ErrorReading
+;	Chamada se ocorrer um erro lendo um arquivo
+ErrorReading:
+	mov  	ah,0   			; set video mode
+	mov  	al,[modo_anterior]   	; modo anterior
+		
+	mov 	dx, ReadError 	; exibe um erro
+	mov 	ah, 09h 		; usando a função 09h
+	int 	21h 			; chama serviço do DOS
+	
+	mov 	dx, CodErro 	; exibe o codigo do erro
+	mov 	ah, 09h 		; usando a função 09h
+	int	 	21h 			; chama serviço do DOS
+	
+	mov 	ax, 4C02h 		; termina programa com um errorlevel =2
+	int 	21h
+	ret
+
+
+;_____________________________________________________________________
+;   função ErrorOpening
+;	Chamada se ocorrer um erro abrindo um arquivo
+checkError:
+;01h compartilhamento de arquivo não habilitado 
+;02h arquivo não encontrado 
+;03h caminho não encontrado ou arquivo não existe 
+;04h nenhum manipulador disponível 
+;05h acesso negado 
+;0Ch modo de acesso não permitido
+
+	cmp 	ax, 01h
+	je		set1
+	cmp 	ax, 02h 
+	je		set2
+	cmp 	ax, 03h
+	je		set3
+	cmp 	ax, 04h
+	je		set4
+	cmp 	ax, 05h
+	je		set5
+	cmp 	ax, 06h
+	je		set5
+	cmp 	ax, 0Ch
+	je		setCh
+	ret
+	
+set1:
+	mov		word[CodErro], '1'
+	ret
+set2:
+	mov		word[CodErro], '2'
+	ret
+set3:
+	mov		word[CodErro], '3'
+	ret
+set4:
+	mov		word[CodErro], '4'
+	ret
+set5:
+	mov		word[CodErro], '5'
+	ret
+set6:
+	mov		word[CodErro], '5'
+	ret
+setCh:
+	mov		word[CodErro], 'c'
+	ret
+	
+;_____________________________________________________________________
+;   função fecharArquivoLeitura
+;	fechar um arquivo aberto para leitura
+fecharArquivoLeitura:
+	mov		bx, [fileHandler]
+	mov		ah, 3eh
+	int 	21h
+	ret
 	
 ;_____________________________________________________________________
 ;   função selecionarQv
@@ -294,7 +467,7 @@ selecionarQv:
 	call 	escreverMensagens
 	call	escreverMsgQvSelecionado
 	call	mouse
-
+	
 ;_____________________________________________________________________
 ;   função escreverMensagens
 escreverMensagens:
@@ -1254,6 +1427,11 @@ msgQv	 		db 'Qv'
 msgP 			db 'P'
 msgQw 			db 'Qw'
 msgSair 		db 'Sair'
+msgTeste 		db 'teste'
+
+OpenError 		db "Ocorreu um erro(abrindo): !$"
+CodErro			db "0$"
+ReadError 		db "Ocorreu um erro(lendo)!$"
 
 ; Cliques do mouse
 mouseClick 		dw 0h
@@ -1270,7 +1448,13 @@ valueIncremento dw 10
 valueDecremento dw 10
 
 ; Arquivos
-filename db "D:\Rodrigo\UFES\Embarcados\Programas\Codigo\sinal.txt", 0
+filename 		db "D:\Rodrigo\UFES\Embarcados\Programas\Codigo\sinal.txt", 0
+fileHandler 	dw 0
+
+dadosArquivo	resb 9216 		; buffer para armazenar leitura do arquivo
+
+contadorDadosVisualizados 	dw	0	; contador de dados, lê 512 por vez
+contadorGeral				dw	0	; contador para armazenar todo o arquivo na memória	
 
 ; KeyPressed
 kbdbuf			db 128
